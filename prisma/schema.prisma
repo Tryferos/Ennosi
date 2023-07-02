@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id        String     @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String   @db.VarChar(255)
+  content   String? @db.Text
+  published Boolean  @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  likes     Like[]
+  comments  Comment[]
+
+  @@unique([authorId, title])
+}
+
+model Like {
+  id       String     @id @default(cuid())
+  post     Post       @relation(fields: [postId], references: [id])
+  postId   String
+  user     User       @relation(fields: [userId], references: [id])
+  userId   String
+  likedAt  DateTime   @default(now())
+  hasLiked Boolean    @default(true)
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        String     @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String? @db.Text
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+
+}
+
+model Profile {
+  id     String     @id @default(cuid())
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id])
+  userId String     @unique
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id      String     @id @default(cuid())
+  email   String   @unique
+  username String   @unique
+  image   String?
+  name    String? 
+  posts   Post[]
+  profile Profile?
+  sessions Session[]
+  likes   Like[]
+  comments Comment[]
+
+}
