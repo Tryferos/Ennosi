@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@font-face {
+  font-family: PTSans;
+  src: url('../../public/fonts/PTSans-Regular.ttf');
+}
+
+@font-face {
+  font-family: Cubano;
+  src: url('../../public/fonts/Cubano.ttf');
+}
+
+@font-face {
+  font-family: Wotfard;
+  src: url('../../public/fonts/wotfard-regular-webfont.woff2');
+}
+@font-face {
+  font-family: WotfardMD;
+  src: url('../../public/fonts/wotfard-medium-webfont.woff2');
+}
+@font-face {
+  font-family: WotfardSB;
+  src: url('../../public/fonts/wotfard-semibold-webfont.woff2');
+}
+
+@layer components{
+  
+}
+
+.fixgradient{
+  background-size: auto 1.9ch;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+  }
+  * {
+    margin: 0;
+  }
+  html, body {
+    height: 100%;
+  }
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+  input, button, textarea, select {
+    font: inherit;
+  }
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
+  #root, #__next {
+    isolation: isolate;
+  }
+

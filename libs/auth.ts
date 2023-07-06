@@ -5,40 +5,83 @@ import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { nanoid } from "@reduxjs/toolkit";
 
+
+
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(db),
     session: {
         strategy: "jwt",
-        maxAge: 30 * 24 * 60 * 60,
-        updateAge: 24 * 60 * 60,
     },
+    secret: process.env.NEXTAUTH_SECRET,
     pages: {
-        signIn: "/auth/signin",
-        signOut: "/auth/signout",
+        signIn: "/signin",
     },
     providers: [
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
         Credentials({
-            name: "Credentials",
+            id: 'login',
+            name: "Login Credentials",
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "jsmith" },
-                password: { label: "Password", type: "password" },
+                username: { label: "username", type: "text", placeholder: "jsmith" },
+                password: { label: "password", type: "password" },
             },
             async authorize(credentials, req) {
+                const dbUser = await db.user.findFirst({
+                    where: {
+                        OR: [
+                            {email: credentials?.username},
+                            {username: credentials?.username}
+                        ]
+                    }
+                })
+                if(dbUser && dbUser.password === credentials?.password){
+                    return dbUser;
+                }
                 return null
+            }
+        }),
+        Credentials({
+            id: 'register',
+            name: "Register Credentials",
+            credentials: {
+                username: { label: "username", type: "text", placeholder: "jsmith" },
+                email: { label: "email", type: "email", placeholder: "example@yahoo.gr"},
+                password: { label: "password", type: "password" },
+            },
+            async authorize(credentials, req) {
+                const dbUser = await db.user.findFirst({
+                    where: {
+                        OR: [
+                            {email: credentials?.email},
+                            {username: credentials?.username}
+                        ]
+                    }
+                })
+
+                if(dbUser || !credentials?.username || !credentials?.email || !credentials?.password){
+                    return null;
+                }
+
+                const newUser = await db.user.create({
+                    data: {
+                        username: credentials?.username,
+                        email: credentials?.email,
+                        password: credentials?.password,
+                    }
+                })
+
+                return { id: newUser.id, username: newUser.username, email: newUser.email };
             }
         })
     ],
     callbacks: {
         async session({token, session}) {
-            session.user.id = token.id;
-            session.user.name = token.name;
-            session.user.email = token.email;
-            session.user.image = token.picture;
-            session.user.username = token.username;
+            if(token){
+                session.user.id = token.id;
+                session.user.name = token.name;
+                session.user.email = token.email;
+                session.user.image = token.picture;
+                session.user.username = token.username;
+            }
             return session
         },
         async jwt({token, user}) {
@@ -48,16 +91,15 @@ export const authOptions: NextAuthOptions = {
                 }
             })
             if(!dbUser){
-                token.id = user!.id;
                 return token;
             }
-            if(!dbUser.username){
+            if(!dbUser.name){
                 await db.user.update({
                     where: {
                         id: dbUser.id,
                     },
                     data: {
-                        username: nanoid(12),
+                        name: nanoid(12),
                     }
                 });
             }
@@ -69,8 +111,8 @@ export const authOptions: NextAuthOptions = {
                 username: dbUser.username,
             }
         },
-        redirect({url, baseUrl}) {
-            return url.startsWith(baseUrl) ? url : baseUrl
+        redirect() {
+            return '/'
         }
     },
 }

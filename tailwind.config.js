@@ -8,7 +8,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-
+        primary: '#1f2937',
+        secondary: '#0284c7',
+        accent: '#FF5722',
+        success: '#4CAF50',
+        info: '#2196F3',
+        warning: '#FFC107',
+        error: '#F44336',
+        dark: '#212121',
+        light: '#F5F5F5',
       },
       screens: {
         sm: {max: '640px'},
@@ -74,7 +82,8 @@ module.exports = {
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       boxShadow: {
-        
+        below: '2px 0px 8px 3px #cacaca',
+        allsides: '0px 0px 8px 3px #cacaca',
       }
     },
   },
