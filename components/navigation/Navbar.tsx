@@ -42,7 +42,7 @@ const Navbar: FC = (props) => {
 
     }, [])
     return (
-    <nav className='fixed flex justify-between top-0 left-0 w-[100%] px-10 small:px-4 h-[75px] bg-white shadow-below border-b-[1px] border-b-gray-300'>
+    <nav className='fixed flex justify-between top-0 left-0 w-[100%] px-10 small:px-4 h-[75px] bg-white shadow-below border-b-[1px] border-b-gray-300 items-center'>
         <figure></figure>
         <SearchBar/>
         <ul className='flex justify-between items-center gap-x-4 flex-row-reverse'>

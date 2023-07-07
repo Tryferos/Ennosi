@@ -4,6 +4,8 @@ import { FC, Fragment, ReactNode } from 'react'
 import SearchBar from './SearchBar'
 import { UsernameIcon } from '@components/Icons/SignIn'
 import Notifications from './Notifications'
+import { AppearanceIcon, SettingsIcon, SignInIcon, SignOutIcon } from '@components/Icons/Navigation'
+import { useRouter } from 'next/router'
 
 export const UserImage: FC = () => {
     return (
@@ -11,8 +13,17 @@ export const UserImage: FC = () => {
             <UserImageLink/>
             <div className='w-full h-[1px] bg-gray-300 my-2'></div>
             <UserSettings/>
+            <PageSettings/>
             <SessionChange/>
         </Fragment>
+    )
+}
+const PageSettings: FC = () => {
+    return (
+        <ItemWrapper>
+            <figure><AppearanceIcon/></figure>
+            <p>Appearance</p>
+        </ItemWrapper>
     )
 }
 const SessionChange: FC = () => {
@@ -26,7 +37,7 @@ const SignIn: FC = () => {
     const handleClick = () => signIn()
     return (
         <ItemWrapper onClick={handleClick}>
-            <figure></figure>
+            <figure><SignInIcon/></figure>
             <p>Sign In</p>
         </ItemWrapper>
     )
@@ -36,7 +47,7 @@ const SignOut: FC = () => {
     const handleClick = () => signOut()
     return (
         <ItemWrapper onClick={handleClick}>
-            <figure></figure>
+            <figure><SignOutIcon/></figure>
             <p>Sign Out</p>
         </ItemWrapper>
     )
@@ -56,16 +67,21 @@ const UserSettings: FC = () => {
     }
     return (
         <ItemWrapper>
-            <figure></figure>
+            <figure><SettingsIcon/></figure>
             <p>Account Settings</p>
         </ItemWrapper>
     )
 }
 const UserImageLink: FC = () => {
     const {data: session} = useSession()
-    const username = session ? session.user.username : 'Visitor'
+    const router = useRouter()
+    const username = session ? `${session.user.firstName} ${session.user.lastName}` : 'Visitor'
+    const handleClick = () => {
+        if(!session) return;
+        router.push(`/account/${session?.user.id}`)
+    }
     return (
-        <li className='flex justify-start items-center gap-x-2 hover:bg-gray-100 py-4 px-2 rounded-md cursor-pointer'>
+        <li onClick={handleClick} className='flex justify-start items-center gap-x-2 hover:bg-gray-100 py-4 px-2 rounded-md cursor-pointer'>
             <figure className='relative scale-110'><UserImageIcon/></figure>
             <p>{username}</p>
         </li>

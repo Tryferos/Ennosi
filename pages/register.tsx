@@ -12,18 +12,22 @@ import { useState } from "react";
 
 export default function Register(){
     const {data: session, status, update} = useSession()
-    const [username, setUsername] = useState<string>('')
+    const [firstName, setFirstName] = useState<string>('')
+    const [lastName, setLastName] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         e.stopPropagation()
-        if(!(username.length>4 && password.length>4)) return
-            signIn('register', {username: username, password: password, email: email});
+        if(!(firstName.length>=4 && lastName.length>4 && password.length>4)) return
+            signIn('register',{firstName: firstName, lastName: lastName, password: password, email: email},);
         }
-    const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(e.target.value)
+    const handleFirstName = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFirstName(e.target.value)
+    }
+    const handleLastName = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLastName(e.target.value)
     }
     const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(e.target.value)
@@ -32,7 +36,7 @@ export default function Register(){
         setPassword(e.target.value)
     }
     return (
-        <article className='w-full h-[100vh] flex flex-row-reverse'>
+        <article className='w-full h-[100vh] flex flex-row-reverse bg-white'>
         <form className='w-[55%] h-full flex flex-col items-center pt-[200px] gap-y-10' onSubmit={handleSubmit}>
             <div className='w-[calc(200px+10vw)] h-full flex flex-col gap-y-10'>
             <header className='flex flex-col justify-start gap-y-5'>
@@ -40,7 +44,8 @@ export default function Register(){
                 <h3 className='text-gray-500'>Start sharing your projects with others</h3>
             </header>
             <fieldset className='flex flex-col gap-y-4'>
-            <InputField icon={<UsernameIcon/>} label='username' type='text' value={username} onChange={handleUsername} placeholder='username' required={true} id='username'/>
+            <InputField icon={<UsernameIcon/>} label='First Name' type='text' value={firstName} onChange={handleFirstName} placeholder='First Name' required={true} id='firstName'/>
+            <InputField icon={<UsernameIcon/>} label='Last Name' type='text' value={lastName} onChange={handleLastName} placeholder='Last Name' required={true} id='lastName'/>
             <InputField icon={<EmailIcon/>} label='email' type='email' value={email} onChange={handleEmail} placeholder='email' required={true} id='email'/>
             <InputField icon={<PasswordIcon/>} label='password' type='password' value={password} onChange={handlePassword} placeholder='password' required={true} id='password'/>
             </fieldset>

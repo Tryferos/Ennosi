@@ -21,15 +21,14 @@ export const authOptions: NextAuthOptions = {
             id: 'login',
             name: "Login Credentials",
             credentials: {
-                username: { label: "username", type: "text", placeholder: "jsmith" },
+                email: { label: "email", type: "email", placeholder: "example@yahoo.coom" },
                 password: { label: "password", type: "password" },
             },
             async authorize(credentials, req) {
                 const dbUser = await db.user.findFirst({
                     where: {
                         OR: [
-                            {email: credentials?.username},
-                            {username: credentials?.username}
+                            {email: credentials?.email},
                         ]
                     }
                 })
@@ -43,7 +42,8 @@ export const authOptions: NextAuthOptions = {
             id: 'register',
             name: "Register Credentials",
             credentials: {
-                username: { label: "username", type: "text", placeholder: "jsmith" },
+                firstName: { label: "First Name", type: "text", placeholder: "jsmith" },
+                lastName: { label: "Last Name", type: "text", placeholder: "jsmith" },
                 email: { label: "email", type: "email", placeholder: "example@yahoo.gr"},
                 password: { label: "password", type: "password" },
             },
@@ -52,24 +52,26 @@ export const authOptions: NextAuthOptions = {
                     where: {
                         OR: [
                             {email: credentials?.email},
-                            {username: credentials?.username}
                         ]
                     }
                 })
 
-                if(dbUser || !credentials?.username || !credentials?.email || !credentials?.password){
+                if(dbUser || !credentials?.firstName || !credentials.lastName || !credentials?.email || !credentials?.password){
                     return null;
                 }
 
                 const newUser = await db.user.create({
                     data: {
-                        username: credentials?.username,
+                        username: `${credentials?.firstName}_${credentials?.lastName}`.toLowerCase(),
                         email: credentials?.email,
                         password: credentials?.password,
+                        firstName: credentials?.firstName,
+                        lastName: credentials?.lastName,
                     }
                 })
 
-                return { id: newUser.id, username: newUser.username, email: newUser.email };
+
+                return { id: newUser.id, username: newUser.username, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName };
             }
         })
     ],
@@ -81,6 +83,8 @@ export const authOptions: NextAuthOptions = {
                 session.user.email = token.email;
                 session.user.image = token.picture;
                 session.user.username = token.username;
+                session.user.firstName = token.firstName;
+                session.user.lastName = token.lastName;
             }
             return session
         },
@@ -93,22 +97,13 @@ export const authOptions: NextAuthOptions = {
             if(!dbUser){
                 return token;
             }
-            if(!dbUser.name){
-                await db.user.update({
-                    where: {
-                        id: dbUser.id,
-                    },
-                    data: {
-                        name: nanoid(12),
-                    }
-                });
-            }
             return {
                 id: dbUser.id,
-                name: dbUser.name,
+                username: dbUser.username,
+                firstName: dbUser.firstName,
+                lastName: dbUser.lastName,
                 email: dbUser.email,
                 picture: dbUser.image,
-                username: dbUser.username,
             }
         },
         redirect() {

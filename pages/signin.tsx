@@ -11,17 +11,17 @@ import { FC, Fragment, useState } from 'react'
 
 export default function SignIn(props: InferGetServerSidePropsType<typeof getServerSideProps>){
     const {data: session, status, update} = useSession()
-    const [username, setUsername] = useState<string>('')
+    const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         e.stopPropagation()
-            if(!(username.length>4 && password.length>4)) return
-            signIn('login', {username: username, password: password});
+            if(!(email.length>4 && password.length>4)) return
+            signIn('login', {email: email, password: password});
         }
-    const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(e.target.value)
+    const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value)
     }
     const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value)
@@ -37,7 +37,7 @@ export default function SignIn(props: InferGetServerSidePropsType<typeof getServ
         </header>
         <input name='csrfToken' type='hidden' defaultValue={props.csrfToken}/>
         <fieldset className='flex flex-col gap-y-4'>
-        <InputField icon={<EmailIcon/>} label='username' type='text' value={username} onChange={handleUsername} placeholder='username or email' required={true} id='username'/>
+        <InputField icon={<EmailIcon/>} label='email' type='text' value={email} onChange={handleEmail} placeholder='Email' required={true} id='email'/>
         <InputField icon={<PasswordIcon/>} label='password' type='password' value={password} onChange={handlePassword} placeholder='password' required={true} id='password'/>
         </fieldset>
         <Button label='Login'/>

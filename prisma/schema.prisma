@@ -85,9 +85,10 @@ model User {
   id      String     @id @default(cuid())
   email   String   @unique
   username String   @unique
+  firstName String
+  lastName String
   image   String?
   password String
-  name    String? 
   projects   Project[]
   profile Profile?
   sessions Session[]
@@ -95,4 +96,5 @@ model User {
   comments Comment[]
   connectionsUser Connection[]@relation("user")
   connectionsTo Connection[]@relation("connectedTo")
+
 }
