@@ -6,6 +6,7 @@ import { store } from 'store/store'
 import { Session } from 'next-auth'
 import { FC, ReactNode } from 'react'
 import Navbar from '@components/navigation/Navbar'
+import PopupElement from '@components/Popups/PopupElement'
 
 export default function App({ Component, pageProps: {session, ...pageProps} }: AppProps) {
   return (
@@ -13,6 +14,7 @@ export default function App({ Component, pageProps: {session, ...pageProps} }: A
       <Provider store={store}>
         <Wrapper>
           <Component {...pageProps} />
+          <PopupElement/>
         </Wrapper>
       </Provider>
     </SessionProvider>

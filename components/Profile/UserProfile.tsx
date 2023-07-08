@@ -4,11 +4,10 @@ import { useRouter } from 'next/router'
 import { FC, Fragment, ReactNode, useEffect, useState } from 'react'
 import Bio from './Bio'
 import { UsernameSkeleton } from '@components/Skeletons/Profile'
-type UserProfileProps = {
-    userId: string,
-    ownProfile: boolean
-}
-const UserProfile: FC<UserProfileProps> = (props) => {
+import { InferGetServerSidePropsType} from 'next'
+import { getServerSideProps } from 'pages/account/[userId]'
+
+const UserProfile: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (props) => {
     const [user, setUser] = useState<User & Profile>()
     const router = useRouter()
     useEffect(() => {
@@ -26,17 +25,17 @@ const UserProfile: FC<UserProfileProps> = (props) => {
     return (
         <ProfileSectionWrapper>
             <aside className='h-[150px] w-full bg-gradient-to-r rounded-t-xl from-orange-200 to-fuchsia-300 via-yellow-100 bg-opacity-20'></aside>
-            <figure className='w-[150px] absolute h-[150px] rounded-full bg-gray-200 border-4 border-white top-[75px] left-5'>
+            <figure className='w-[150px] absolute h-[150px] rounded-full bg-gray-200 border-4 border-white top-[65px] left-5'>
                 <Image src='/images/person.jpg' fill={true} style={{objectFit: 'cover'}} alt='Profile Picture' className='rounded-full'/>
             </figure>
-            <div className='p-5 px-6 font-wotfard flex flex-col gap-y-4 mt-[75px]'>
+            <div className='p-5 px-6 font-wotfard flex flex-col gap-y-2 mt-[50px]'>
                 {
                     user ?
                     <p className='font-wotfard-sb text-xl'>{user.firstName} {user.lastName}</p>
                     :
                     <UsernameSkeleton/>
                 }
-                {user && <Bio {...{...user, id: user.id as string}}/>}
+                {user && <Bio {...{...user, id: user.id as string, ownProfile: props.ownProfile}}/>}
             </div>
         </ProfileSectionWrapper>
     )
