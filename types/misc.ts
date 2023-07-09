@@ -14,3 +14,8 @@ export type Wrapper = {
 export type PopupData<T> = {
     data: T;
 }
+
+export const RequestJsonOptions: RequestInit = {
+    headers: {'Content-Type': 'application/json'},
+    method: 'POST',
+}

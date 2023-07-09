@@ -68,10 +68,10 @@ model Comment {
 
 model Profile {
   id     String     @id @default(cuid())
-  bio    String?
-  gender Gender?
-  nationality String?
-  city String?
+  bio    String
+  gender Gender
+  nationality String
+  city String
   user   User    @relation(fields: [userId], references: [id])
   userId String     @unique
 }
