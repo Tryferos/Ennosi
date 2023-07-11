@@ -2,17 +2,19 @@ import Collaborations from '@components/Profile/Collaborations'
 import UserProfile from '@components/Profile/UserProfile'
 import UserProjects from '@components/Profile/UserProjects'
 import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from 'next'
-import { getSession } from 'next-auth/react'
+import { getCsrfToken, getSession } from 'next-auth/react'
 import Image from 'next/image'
 import { FC, Fragment } from 'react'
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
     const { userId } = context.query
     const session = await getSession(context)
+    const csrfToken = await getCsrfToken(context)
     return {
         props: {
             userId: userId as string,
-            ownProfile: session?.user?.id === userId
+            ownProfile: session?.user?.id === userId,
+            csrfToken
         }
     }
 }
