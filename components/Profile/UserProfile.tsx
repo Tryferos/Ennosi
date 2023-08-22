@@ -57,7 +57,7 @@ const ProfileFriendSection: FC<Pick<UserProfile, 'userId' | 'connection' | 'ownP
 
         dispatch(fetchNotifications());
 
-    }, [])
+    }, [props])
     const handleFriendAdd = () => {
         (async () => {
             const res = await fetch('/api/profile/friend-request', {
@@ -88,7 +88,9 @@ const ProfileFriendSection: FC<Pick<UserProfile, 'userId' | 'connection' | 'ownP
                 body: JSON.stringify({userId: props.userId})
             })
             const data = await res.json();
-            props.fetchUser();
+            if(data.success===true){
+                props.fetchUser();
+            }
         })();
     }
     if(props.ownProfile){

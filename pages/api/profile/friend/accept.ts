@@ -29,6 +29,7 @@ export default async function handler(
         return res.json({success: false})
     }
 
+
     await prisma.user.update({
         where: {id: friendId},
         data: {
@@ -46,12 +47,10 @@ export default async function handler(
     await prisma.user.update({
         where: {id: userId},
         data: {
-            connectionsTo: {
-                update: {
-                    where: {id: connection[0].id},
-                    data: {
-                        accepted: true
-                    }
+            connectionsUser: {
+                create: {
+                    connectedToId: friendId,
+                    accepted: true
                 }
             }
         }

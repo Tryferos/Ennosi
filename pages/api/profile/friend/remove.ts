@@ -42,12 +42,18 @@ export default async function handler(
         }
     })
 
+    const friendConnection = await prisma.user.findUnique({
+        where: {id: friendId},
+    }).connectionsUser({where: {connectedToId: userId}});
+
+    if(!friendConnection || friendConnection.length==0)return res.json({success: false});
+
     await prisma.user.update({
         where: {id: friendId},
         data: {
-            connectionsTo: {
+            connectionsUser: {
                 delete: {
-                    id: connection[0].id
+                    id:friendConnection[0].id
                 }
             }
         }

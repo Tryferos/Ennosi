@@ -29,11 +29,12 @@ export default async function handler(
         data: {
             connectionsUser: {
                 create: {
-                    connectedToId: friendId
+                    connectedToId: friendId,
                 }
-            }
+            },
         }
     })
+
 
     return res.json({success: true});
 }
