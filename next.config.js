@@ -7,6 +7,11 @@ const nextConfig = {
         hostname: 'flagcdn.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+      },
     ],
   },
   reactStrictMode: false,

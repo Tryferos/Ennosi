@@ -47,6 +47,23 @@
   background-size: auto 1.9ch;
 }
 
+.scrollbar-dropdown::-webkit-scrollbar {
+  height:2px;
+  background-color: transparent;
+}
+
+.scrollbar-dropdown::-webkit-scrollbar-thumb {
+  background-color: rgb(102, 98, 98);
+  border-radius: 8px;
+  width: 4px;
+  border: 4px solid rgb(255, 255, 255);
+}
+
+.scrollbar-dropdown::-webkit-scrollbar-truck{
+  background-color: black;
+  border-radius: 4px;
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -63,6 +80,9 @@
   img, picture, video, canvas, svg {
     display: block;
     max-width: 100%;
+  }
+  input[type=file]::-webkit-file-upload-button{
+    cursor: pointer;
   }
   input, button, textarea, select {
     font: inherit;

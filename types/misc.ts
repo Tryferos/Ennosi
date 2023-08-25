@@ -1,4 +1,4 @@
-import { Comment, Connection, Like, Profile, Project, User } from "@prisma/client";
+import { Comment, Connection, Like, Profile, Project, ProjectPartners, User } from "@prisma/client";
 
 export enum Popup{
     None,
@@ -29,3 +29,7 @@ export type Notifications = {
     projectComments: Array<Comment>;
     projectCollaborations: Array<Pick<Project, 'authorId' | 'updatedAt' | 'createdAt' | 'thubmnailUrl' | 'id' | 'title'>>
 }
+
+
+export type UploadProject = Partial<Pick<Project, 'demoUrl' | 'description' | 'title' | 'thubmnailUrl' | 'githubUrl' | 'id' | 'published' | 'imagesUrl'>>;
+export type UploadPartner = Pick<ProjectPartners, 'userId'> & Pick<User, 'firstName' | 'lastName'> & Partial<Pick<User, 'image'>>;

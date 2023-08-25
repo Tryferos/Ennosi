@@ -17,10 +17,15 @@
     "baseUrl": "./",
     "paths": {
       "@components/*": ["components/*"],
-      "@libs/*": ["libs/*"],
+      "@lib/*": ["libs/*"],
       "@public/*": ["public/*"],
     }
   },
+  "plugins": [
+    {
+      "name": "next"
+    }
+  ],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

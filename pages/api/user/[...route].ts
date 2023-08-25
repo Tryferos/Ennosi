@@ -1,4 +1,4 @@
-import { authOptions } from '@libs/auth';
+import { authOptions } from 'libs/auth';
 import { Profile, User } from '@prisma/client'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth';

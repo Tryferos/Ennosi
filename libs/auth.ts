@@ -1,11 +1,10 @@
+
 import { NextAuthOptions, Session, User, getServerSession } from "next-auth";
 import {PrismaAdapter} from '@next-auth/prisma-adapter'
 import db from './db'
 import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { nanoid } from "@reduxjs/toolkit";
-
-
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(db),

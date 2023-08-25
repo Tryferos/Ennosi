@@ -38,8 +38,7 @@ export const NotificationsSlice = createSlice( {
             state.loading = false;
             state.error = action.error
         } );
-        builder.addCase( fetchNotifications.fulfilled, ( state, action ) => {
-            
+        builder.addCase( fetchNotifications.fulfilled, ( state, action ) => {            
             state['friendRequests'] = action.payload['friendRequests'];
             state.loading = false;
             state.error = undefined;

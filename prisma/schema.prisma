@@ -11,29 +11,26 @@ datasource db {
 }
 
 model Project {
-  id           String    @id @default(cuid())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  title        String    @db.VarChar(255)
-  description      String?   @db.Text
-  published    Publicity @default(Public)
-  author       User      @relation(fields: [authorId], references: [id])
+  id           String            @id @default(cuid())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  title        String            @db.VarChar(255)
+  description  String?           @db.Text
+  published    Publicity         @default(Public)
+  author       User              @relation(fields: [authorId], references: [id])
   authorId     String
   likes        Like[]
   comments     Comment[]
   partners     ProjectPartners[]
   thubmnailUrl String?
+  imagesUrl    String[]
   githubUrl    String?
   demoUrl      String?
 
   @@unique([authorId, title])
-  @@unique([authorId, githubUrl])
-  @@unique([authorId, demoUrl])
-  @@unique([authorId, githubUrl, demoUrl])
-
 }
 
-model ProjectPartners{
+model ProjectPartners {
   id        String   @id @default(cuid())
   project   Project  @relation(fields: [projectId], references: [id])
   projectId String
@@ -110,20 +107,20 @@ model Session {
 }
 
 model User {
-  id              String       @id @default(cuid())
-  email           String       @unique
-  username        String       @unique
+  id              String            @id @default(cuid())
+  email           String            @unique
+  username        String            @unique
   firstName       String
   lastName        String
   image           String?
   password        String
-  createdAt       DateTime     @default(now())
+  createdAt       DateTime          @default(now())
   projects        Project[]
   profile         Profile?
   sessions        Session[]
   likes           Like[]
   comments        Comment[]
-  connectionsUser Connection[] @relation("user")
-  connectionsTo   Connection[] @relation("connectedTo")
+  connectionsUser Connection[]      @relation("user")
+  connectionsTo   Connection[]      @relation("connectedTo")
   partners        ProjectPartners[]
 }

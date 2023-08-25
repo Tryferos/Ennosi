@@ -7,16 +7,17 @@ import { ExitIcon } from '@components/Icons/Profile';
 import { changePopup } from 'store/PopupSlice';
 import { Project } from '@prisma/client';
 import ProjectPopup from './ProjectPopup';
+import { ToastContainer } from 'react-toastify';
 
 const PopupElement: FC = (props) => {
-    const {popup, data} = useAppSelector(state => state.popup);
+    const { popup, data } = useAppSelector(state => state.popup);
     const dispatch = useAppDispatch();
     const clickHandlerRef = useRef<((ev: MouseEvent) => void) | null>(null);
     useEffect(() => {
-        if(popup===Popup.None) return;
+        if (popup === Popup.None) return;
         const handler = (ev: MouseEvent) => {
-            if((ev.target as HTMLElement).classList.contains('bg-gray-100')){
-                dispatch(changePopup({popup: Popup.None, data: null}))
+            if ((ev.target as HTMLElement).classList.contains('bg-gray-100')) {
+                dispatch(changePopup({ popup: Popup.None, data: null }))
             }
         }
         clickHandlerRef.current = handler;
@@ -27,16 +28,16 @@ const PopupElement: FC = (props) => {
             window.removeEventListener('click', clickHandlerRef.current!);
         }
     }, [popup])
-    if(popup===Popup.None) return null;
+    if (popup === Popup.None) return null;
     return (
         <PopupWrapper>
             {
                 popup === Popup.Bio &&
-                <BioPopup data={data as UserProfile}/>
+                <BioPopup data={data as UserProfile} />
             }
             {
                 popup === Popup.Project &&
-                <ProjectPopup {...data as Project}/>
+                <ProjectPopup {...data as Project} />
             }
         </PopupWrapper>
     )
@@ -55,22 +56,33 @@ type PopupFrameProps = Wrapper & {
     onSubmit?: () => void
 }
 export const PopupFrame: FC<PopupFrameProps> = (props) => {
-    const {title, children} = props;
+    const { title, children } = props;
     const dispatcher = useAppDispatch();
-    const handleExit = () => dispatcher(changePopup({popup: Popup.None, data: null}))
+    const handleExit = () => dispatcher(changePopup({ popup: Popup.None, data: null }))
     const handleSubmit = (ev: React.MouseEvent<HTMLButtonElement>) => {
         ev.stopPropagation();
         props.onSubmit && props.onSubmit();
     }
     return (
-        <div className='w-[40%] flex absolute top-[10%] flex-col bg-white rounded-xl shadow-allsides outline outline-1 outline-gray-300 min-w-[350px] min-h-[200px] font-wotfard'>
+        <div className='w-[40%] flex absolute top-[12.5%] flex-col bg-white rounded-xl shadow-allsides outline outline-1 outline-gray-300 min-w-[650px] md:min-w-[450px] sm:min-w-[350px] min-h-[200px] font-wotfard'>
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light" />
             <div className='h-[20%] w-full flex justify-between py-4 px-6 font-wotfard-md border-b-2 text-lg'>
                 <p>{title}</p>
                 <div className='hover:fill-red-500 cursor-pointer scale-110' onClick={handleExit}>
-                    <ExitIcon/>
+                    <ExitIcon />
                 </div>
             </div>
-            <div className='h-[80%] overflow-y-auto w-full min-h-[200px] max-h-[60vh] z-[150]'>{children}</div>
+            <div className='h-[80%] overflow-y-auto scrollbar-dropdown w-full min-h-[200px] max-h-[60vh] z-[150]'>{children}</div>
             {
                 props.form &&
                 <div className='h-[10%] border-t-2 py-4 rounded-b-xl w-full flex justify-end items-center px-6 bg-white z-[200]'>
