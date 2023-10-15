@@ -3,8 +3,8 @@ import Image from 'next/image'
 import { getServerSideProps } from 'pages/account/[userId]'
 import { FC, Fragment, useEffect, useRef, useState } from 'react'
 import { ProfileSectionWrapper } from './UserProfile'
-import { AddIcon, DemoIcon, FriendsIcon, GithubIcon, PrivateIcon, PublicIcon } from '@components/Icons/Profile'
-import { useAppDispatch } from 'store/hooks'
+import { AddIcon, DemoIcon, EditIcon, FriendsIcon, GithubIcon, PrivateIcon, PublicIcon } from '@components/Icons/Profile'
+import { useAppDispatch, useAppSelector } from 'store/hooks'
 import { changePopup } from 'store/PopupSlice'
 import { Popup } from 'types/misc'
 import { ProfileProject } from 'pages/api/project/get'
@@ -72,7 +72,7 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
                     </ul>
                 }
                 <div ref={infoRef} className={`${offset < 50 && 'hidden'} absolute top-0 duration-400 transition-transform -right-20 h-[200px] items-center flex w-10`}>
-                    {cursorId && <LinksInfo {...projects.find(item => item.id == cursorId)} />}
+                    {cursorId && <LinksInfo project={{...projects.find(item => item.id == cursorId)}} ownProfile={props.ownProfile} />}
                 </div>
             </div>
         </section>
@@ -81,16 +81,27 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
 
 export default UserProjects
 
-const LinksInfo: FC<Partial<Pick<ProfileProject, 'demoUrl' | 'githubUrl' | 'partners'>>> = (props) => {
+const LinksInfo: FC<{project: Partial<Pick<ProfileProject, 'demoUrl' | 'githubUrl' | 'partners'>>} & {ownProfile: boolean}> = (props) => {
+    const {popup, data} = useAppSelector(state => state.popup);
+    const dispatch = useAppDispatch();
+    const handleEdit = () => {
+        dispatch(changePopup({popup: Popup.Project, data: props.project}))
+    }
     if (!props) return null;
+    const project = props.project;
     return (
         <ul className='flex flex-col gap-y-6 justify-center items-center'>
-            <div className='absolute top-0'>
+            <div className={`${project.partners && project.partners.length > 0 ? 'h-10' : 'h-0'}`}></div>
+            {
+                props.ownProfile &&
+                <div onClick={handleEdit} className='absolute top-0 h-6 w-6 flex items-center justify-center hover:scale-110 hover:brightness-200 rounded-full cursor-pointer'><EditIcon/></div>
+            }
+            <div className='absolute top-10'>
                 <p className='text-sm font-wotfard-md underline'>Links</p>
             </div>
-            {props.githubUrl && <Link href={props.githubUrl} target='_blank' title='Github' className='hover:fill-purple-700 scale-150 cursor-pointer'><GithubIcon /></Link>}
-            {props.demoUrl && <Link href={props.demoUrl} target='_blank' title='Live Demo' className='hover:fill-purple-700 scale-150 cursor-pointer'><DemoIcon /></Link>}
-            {props.partners && props.partners.map((_p, _i) => {
+            {project.githubUrl && <Link href={project.githubUrl} target='_blank' title='Github' className='hover:fill-purple-700 scale-150 cursor-pointer'><GithubIcon /></Link>}
+            {project.demoUrl && <Link href={project.demoUrl} target='_blank' title='Live Demo' className='hover:fill-purple-700 scale-150 cursor-pointer'><DemoIcon /></Link>}
+            {project.partners && project.partners.map((_p, _i) => {
                 const { image, firstName, lastName, userId } = _p.user;
                 return (
                     <Link key={_i} title={`${firstName} ${lastName}`} target='_blank' href={`/account/${userId}`}>
@@ -117,12 +128,12 @@ const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
                     </figure>
                     <div className='flex flex-col text-center'>
                         <p className='font-wotfard-sb text-lg'>{props.author.firstName} {props.author.lastName}</p>
-                        <p>{parseDate(props.createdAt)}</p>
+                        <p className='text-sm text-gray-500'>{parseDate(props.createdAt)}</p>
                     </div>
                     <div className='scale-90'><Privacy published={props.published} ownProfile={props.ownProfile} /></div>
                 </div>
                 <figure className='w-full h-[400px] relative'>
-                    <Image quality={100} src={props.thubmnailUrl ?? '/images/person.jpg'} fill={true} alt='Project Image' style={{ objectFit: 'cover' }} />
+                    <Image quality={100} src={props.thubmnailUrl ?? '/images/person.jpg'} fill={true} alt='Project Image' style={{ objectFit: 'contain' }} />
                 </figure>
                 <div className='flex gap-x-2 -mt-2'>
                     {props.imagesUrl.map((image, i) =>
@@ -140,7 +151,9 @@ const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
 
 const Privacy: FC<Pick<ProfileProject, 'published'> & { ownProfile: boolean }> = (props) => {
     const { ownProfile } = props;
-    return <div title={props.published} className={`${ownProfile && 'cursor-pointer hover:fill-slate-800 hover:scale-110'} fill-slate-500`}>
+    const title = props.published == Publicity.Private ? 'Private. Only you can see this post.' : 
+    props.published == Publicity.Public ? 'Public. Everyone can view this post.' : props.published == Publicity.Friends ? 'Friends. Only people who are connected with you can view this post.' : '';
+    return <div title={title} className={`${ownProfile && 'cursor-pointer hover:fill-slate-800 hover:scale-110'} fill-slate-500`}>
         {
             (props.published == Publicity.Private) ? <PrivateIcon />
                 : (props.published == Publicity.Public) ? <PublicIcon />

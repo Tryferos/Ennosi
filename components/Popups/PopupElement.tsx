@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { FC, Fragment, useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from 'store/hooks'
-import { Popup, UserProfile, Wrapper } from 'types/misc';
+import { Popup, UploadPartner, UserProfile, Wrapper } from 'types/misc';
 import BioPopup from './BioPopup';
 import { ExitIcon } from '@components/Icons/Profile';
 import { changePopup } from 'store/PopupSlice';
@@ -37,7 +37,7 @@ const PopupElement: FC = (props) => {
             }
             {
                 popup === Popup.Project &&
-                <ProjectPopup {...data as Project} />
+                <ProjectPopup {...data as Project & {partners: {user: UploadPartner & {id: string}}[]}} />
             }
         </PopupWrapper>
     )

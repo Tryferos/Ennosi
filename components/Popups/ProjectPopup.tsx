@@ -9,9 +9,9 @@ type ImageProps = {
     url: string;
     file: File | Blob;
 }
-const ProjectPopup: FC<Project | null> = (props) => {
+const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}}[]}) | null> = (props) => {
 
-    const [thumbnail, setThumbnail] = useState<ImageProps>()
+    const [thumbnail, setThumbnail] = useState<ImageProps | null>(props?.thubmnailUrl ? { url: props.thubmnailUrl, file: new Blob() } : null);
     const [images, setImages] = useState<ImageProps[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const form = useRef<HTMLFormElement>(null);
@@ -19,11 +19,12 @@ const ProjectPopup: FC<Project | null> = (props) => {
     const [description, setDescription] = useState<string>(props?.description || '');
     const [github, setGithub] = useState<string>(props?.githubUrl || '');
     const [demo, setDemo] = useState<string>(props?.demoUrl || '');
-    const [partners, setPartners] = useState<UploadPartner[]>([]);
-    const [privacy, setPrivacy] = useState<Publicity>(Publicity.Public);
+    const [partners, setPartners] = useState<UploadPartner[]>((props?.partners && props.partners.map(item => ({...item.user, userId: item.user.id}))) ?? []);
+    const [privacy, setPrivacy] = useState<Publicity>(props?.published ?? Publicity.Public);
     const [query, setQuery] = useState<string>('');
     const [searchFocus, setSearchFocus] = useState<boolean>(false);
     const search = useRef<HTMLInputElement>(null);
+
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         switch (event.target.name) {
@@ -80,6 +81,8 @@ const ProjectPopup: FC<Project | null> = (props) => {
             description,
             githubUrl: github,
             demoUrl: demo,
+            id: props?.id,
+            thubmnailUrl: props?.id ? props.thubmnailUrl : null,
             published: privacy,
             partners: partners.map((partner) => ({ userId: partner.userId, }))
         }
@@ -93,6 +96,13 @@ const ProjectPopup: FC<Project | null> = (props) => {
             return;
         }
         const id = data.id;
+        if(id==props?.id && props?.thubmnailUrl == thumbnail?.url){
+            resolve();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000)
+            return;
+        }
         if (thumbnail) {
             const formData = new FormData();
             formData.append("image", thumbnail.file);
@@ -142,7 +152,7 @@ const ProjectPopup: FC<Project | null> = (props) => {
 
     const handleRemove = (index: number) => {
         if (index == -1) {
-            setThumbnail(undefined);
+            setThumbnail(null);
             return;
         }
         const newImages = [...images];
@@ -233,7 +243,7 @@ const ProjectPopup: FC<Project | null> = (props) => {
                     <div title='Upload an image' onClick={handleUpload} className='px-2 py-1 rounded-full cursor-pointer hover:bg-gray-100'>
                         <Image src={'/images/upload_icon.png'} alt='upload image' width={24} height={24} />
                     </div>
-                    <input ref={inputRef} onChange={handleFile} type="file" className="w-full text-sm text-slate-500
+                    <input ref={inputRef} onChange={handleFile} accept="image/*" type="file" className="w-full text-sm text-slate-500
                             file:mr-4 file:py-2 file:px-4
                             file:rounded-full file:border-0
                             file:text-sm file:font-wotfard-md

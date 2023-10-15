@@ -13,12 +13,15 @@ export function parseDate(_date: Date){
     }
     const offset = now.getTime() - date.getTime();
     if(offset < 1000*60*60){
-        return `${Math.floor(offset/(1000*60))} minutes ago`;
+        const minutes = Math.floor(offset/(1000*60));
+        return `${minutes} minute${minutes != 1 ? 's' : ''} ago`;
     }
     if(offset < 1000*60*60*24){
-        return `${Math.floor(offset/(1000*60*60))} hours ago`;
+        const hours = Math.floor(offset/(1000*60*60));
+        return `${hours} hour${hours != 1 ? 's' : ''} ago`;
     }
     if(offset < 1000*60*60*24*7){
-        return `${Math.floor(offset/(1000*60*60*24))} days ago`;
+        const days = Math.floor(offset/(1000*60*60*24));
+        return `${days} day${days != 1 ? 's' : ''} ago`;
     }
 }
