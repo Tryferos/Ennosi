@@ -12,15 +12,12 @@ export default async function handler(
     const proj = req.body as UploadProject & {partners: UploadPartner[]}
     const session = await getServerSession(req, res, authOptions);
     if(!session) return res.json({success: false})
-    console.log(proj)
     if(proj.id){
         const project = await prisma.project.findUnique({
             where: {
                 id: proj.id
             }
         })
-        console.log('test-1')
-        console.log(session.user)
         if(!project || project.authorId!=session.user.id) return res.json({success: false});
         const result = await prisma.project.update({
             where: {
@@ -36,9 +33,7 @@ export default async function handler(
                 imagesUrl: proj.imagesUrl,
                 }
         });
-        console.log(result)
         if(result==null || !result.authorId) return res.json({success: false});
-        console.log(result.title)
         await prisma.projectPartners.deleteMany({
             where: {
                 projectId: proj.id

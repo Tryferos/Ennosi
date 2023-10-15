@@ -3,14 +3,17 @@ import Image from 'next/image'
 import { getServerSideProps } from 'pages/account/[userId]'
 import { FC, Fragment, useEffect, useRef, useState } from 'react'
 import { ProfileSectionWrapper } from './UserProfile'
-import { AddIcon, DemoIcon, EditIcon, FriendsIcon, GithubIcon, PrivateIcon, PublicIcon } from '@components/Icons/Profile'
+import { AddIcon, DemoIcon, EditIcon, FriendsIcon, GithubIcon, PrivateIcon, PublicIcon, DeleteIcon } from '@components/Icons/Profile'
 import { useAppDispatch, useAppSelector } from 'store/hooks'
 import { changePopup } from 'store/PopupSlice'
-import { Popup } from 'types/misc'
+import { Popup, RequestJsonOptions } from 'types/misc'
 import { ProfileProject } from 'pages/api/project/get'
 import Link from 'next/link'
 import { Publicity } from '@prisma/client'
 import { parseDate } from '@lib/dates'
+import { MenuDotsIcon, SettingsIcon } from '@components/Icons/Navigation'
+import { AnimatePresence, motion } from 'framer-motion'
+import { toast } from 'react-toastify'
 
 const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (props) => {
     const { userId, ownProfile } = props;
@@ -55,7 +58,6 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
             }
             const projects = await res.json() as { projects: ProfileProject[] }
             setProjects(projects.projects);
-            console.log(projects);
         })();
 
     }, [props])
@@ -67,7 +69,7 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
                 {
                     <ul ref={ref} className='flex flex-col gap-y-2  bg-transparent'>
                         {
-                            projects.map(project => <Project key={project.id} {...project} ownProfile={ownProfile} />)
+                            projects.map(project => <Project key={project.id} {...project} ownProfile={ownProfile}/>)
                         }
                     </ul>
                 }
@@ -82,7 +84,6 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
 export default UserProjects
 
 const LinksInfo: FC<{project: Partial<Pick<ProfileProject, 'demoUrl' | 'githubUrl' | 'partners'>>} & {ownProfile: boolean}> = (props) => {
-    const {popup, data} = useAppSelector(state => state.popup);
     const dispatch = useAppDispatch();
     const handleEdit = () => {
         dispatch(changePopup({popup: Popup.Project, data: props.project}))
@@ -118,34 +119,100 @@ const LinksInfo: FC<{project: Partial<Pick<ProfileProject, 'demoUrl' | 'githubUr
 
 
 const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
-    props.published
+    const [open, setOpen] = useState<boolean>(false);
+    const handleClick = () => setOpen(!open);
+    const dispatch = useAppDispatch();
+    const handleEdit = () => {
+        dispatch(changePopup({popup: Popup.Project, data: props}))
+    }
+    const handleDelete = () => {
+        const promise = new Promise(async (resolve, reject) => {
+            const res = await fetch('/api/project/delete', {
+                ...RequestJsonOptions,
+                body: JSON.stringify({id: props.id})
+            })
+            const data = await res.json();
+            if(!data.success){
+                return reject();
+            }
+            resolve(null);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000)
+            return;
+        });
+
+        toast.promise(promise, {
+            pending: 'Deleting...',
+            success: 'Project Deleted!',
+            error: 'Error Deleting Project'
+        })
+    }
     return (
         <Fragment>
-            <li data-index={props.id} className='flex flex-col relative p-8 gap-y-5 rounded bg-white'>
+            <li data-index={props.id} className='flex flex-col relative p-8 gap-y-2 rounded bg-white'>
                 <div className='flex justify-between p-0 relative'>
-                    <figure className='w-[64px] h-[64px] relative rounded-full bg-gray-200 border-4 border-white'>
-                        <Image src={props.author.image ?? '/images/person.jpg'} fill={true} style={{ objectFit: 'cover' }} alt='Profile Picture' className='rounded-full' />
-                    </figure>
-                    <div className='flex flex-col text-center'>
-                        <p className='font-wotfard-sb text-lg'>{props.author.firstName} {props.author.lastName}</p>
-                        <p className='text-sm text-gray-500'>{parseDate(props.createdAt)}</p>
+                    <div className='flex gap-x-2 items-center'>
+                        <figure className='w-[64px] h-[64px] relative rounded-full bg-gray-200 border-4 border-white'>
+                            <Image src={props.author.image ?? '/images/person.jpg'} fill={true} style={{ objectFit: 'cover' }} alt='Profile Picture' className='rounded-full' />
+                        </figure>
+                        <div className='flex flex-col'>
+                            <p className='font-wotfard-sb text-lg'>{props.author.firstName} {props.author.lastName}</p>
+                            <div className='flex gap-x-2 items-center'>
+                                <p className='text-sm text-gray-500'>{parseDate(props.createdAt)}</p>
+                                <div className='w-1 h-1 rounded-full bg-gray-400'></div>
+                                <div className='scale-90'><Privacy published={props.published} ownProfile={props.ownProfile} /></div>
+                            </div>
+                        </div>
                     </div>
-                    <div className='scale-90'><Privacy published={props.published} ownProfile={props.ownProfile} /></div>
-                </div>
-                <figure className='w-full h-[400px] relative'>
-                    <Image quality={100} src={props.thubmnailUrl ?? '/images/person.jpg'} fill={true} alt='Project Image' style={{ objectFit: 'contain' }} />
-                </figure>
-                <div className='flex gap-x-2 -mt-2'>
-                    {props.imagesUrl.map((image, i) =>
-                        <Image key={i} quality={100} src={image} width={80} height={80} className='outline outline-1 outline-gray-300 hover:scale-110 cursor-pointer' alt='Project Image' />)}
-
+                    <div onClick={handleClick} className='p-2 relative cursor-pointer w-10 h-10 flex items-center justify-center hover:bg-gray-200 rounded-full'>
+                        <MenuDotsIcon/>
+                        <MoreOptions open={open} handleEdit={handleEdit} handleDelete={handleDelete}/>
+                    </div>
                 </div>
                 <div className='flex flex-col gap-y-2 text-center relative'>
                     <p className='text-xl font-wotfard-md'>{props.title}</p>
                     <p className='text-sm text-gray-500 font-wotfard'>{props.description}</p>
                 </div>
+                <div className='items-center flex flex-col'>
+                    <div className='w-full h-[1px] bg-gray-200 my-2'></div>
+                    <figure className='w-full h-[400px] relative'>
+                        <Image quality={100} src={props.thubmnailUrl ?? '/images/person.jpg'} fill={true} alt='Project Image' style={{ objectFit: 'contain' }} />
+                    </figure>
+                    <div className='w-full h-[1px] bg-gray-200 my-2'></div>
+                </div>
+                <div className='flex gap-x-2 -mt-2'>
+                    {props.imagesUrl.map((image, i) =>
+                        <Image key={i} quality={100} src={image} width={80} height={80} className='outline outline-1 outline-gray-300 hover:scale-110 cursor-pointer' alt='Project Image' />)}
+
+                </div>
             </li>
         </Fragment>
+    )
+}
+
+const MoreOptions: FC<{open: boolean} & {handleEdit: () => void} & {handleDelete: () => void}> = (props) => {
+    if(!props.open) return null;
+    return (
+        <motion.ul 
+        initial={{opacity: 0, height: '0px'}}
+        transition={{duration: 0.2}}
+        animate={{opacity: 1, minHeight: '104px'}}
+        exit={{opacity: 0, height: '0px'}}
+        className='absolute top-10 right-0 w-[10vw] bg-white rounded shadow-xl flex flex-col gap-y-2 outline outline-1 outline-gray-200 z-[100000]'
+        >
+            <li onClick={props.handleEdit} className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2'>
+                <EditIcon/>
+                <p>Edit Project</p>
+            </li>
+            <li onClick={props.handleDelete} className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2'>
+                <DeleteIcon/>
+                <p>Delete Project</p>
+            </li>
+
+
+
+        </motion.ul>
     )
 }
 

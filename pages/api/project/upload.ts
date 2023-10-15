@@ -18,7 +18,6 @@ export async function getImage(formData: NextApiRequest) {
     const form = new IncomingForm({ keepExtensions: true });
     form.parse(formData, function (err, fields, files) {
         if (err) return reject(err);
-        console.log(fields)
       resolve({ fields, files });
     });
   });

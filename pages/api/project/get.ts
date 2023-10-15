@@ -40,6 +40,9 @@ export default async function handler(
                     image: true
                 },
             }
+        },
+        orderBy: {
+            createdAt: 'desc'
         }
     }) as unknown as ProfileProject[]
 

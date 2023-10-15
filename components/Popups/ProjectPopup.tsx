@@ -111,7 +111,6 @@ const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}
                 body: formData
             })
             const data = await res2.json();
-            console.log(data)
             if (!data.success) return rej();;
         }
         if (images.length > 0) {
@@ -124,7 +123,6 @@ const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}
                     body: formData
                 })
                 const data = await res3.json();
-                console.log(data)
                 if (!data.success) return rej();
                 index++;
             }
@@ -165,7 +163,7 @@ const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}
     }
 
     return (
-        <PopupFrame title='Create a new Project' form={true} onSubmit={handleProjectUpload}>
+        <PopupFrame title={`${props?.id ? `Editing project ${props.title}` : 'Create a new Project'}`} form={true} onSubmit={handleProjectUpload}>
             <form ref={form} className='py-4 px-6 text-primary flex flex-col gap-y-6'>
                 <div className='flex flex-col gap-y-2'>
                     <label className='text-gray-600 font-wotfard-md' htmlFor='title'>Project Title<span aria-label='required'>*</span></label>
