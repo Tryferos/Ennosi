@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { getServerSideProps } from 'pages/account/[userId]'
 import { FC, Fragment, useEffect, useRef, useState } from 'react'
 import { ProfileSectionWrapper } from './UserProfile'
-import { AddIcon, DemoIcon, EditIcon, FriendsIcon, GithubIcon, PrivateIcon, PublicIcon, DeleteIcon } from '@components/Icons/Profile'
+import { AddIcon, DemoIcon, EditIcon, FriendsIcon, GithubIcon, PrivateIcon, PublicIcon, DeleteIcon, LikeIcon, CommentIcon, ReportIcon } from '@components/Icons/Profile'
 import { useAppDispatch, useAppSelector } from 'store/hooks'
 import { changePopup } from 'store/PopupSlice'
 import { Popup, RequestJsonOptions } from 'types/misc'
@@ -14,6 +14,7 @@ import { parseDate } from '@lib/dates'
 import { MenuDotsIcon, SettingsIcon } from '@components/Icons/Navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'react-toastify'
+import { ProjectLike } from 'pages/api/project/likes/get'
 
 const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (props) => {
     const { userId, ownProfile } = props;
@@ -69,12 +70,12 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
                 {
                     <ul ref={ref} className='flex flex-col gap-y-2  bg-transparent'>
                         {
-                            projects.map(project => <Project key={project.id} {...project} ownProfile={ownProfile}/>)
+                            projects.map(project => <Project key={project.id} {...project} ownProfile={ownProfile} />)
                         }
                     </ul>
                 }
                 <div ref={infoRef} className={`${offset < 50 && 'hidden'} absolute top-0 duration-400 transition-transform -right-20 h-[200px] items-center flex w-10`}>
-                    {cursorId && <LinksInfo project={{...projects.find(item => item.id == cursorId)}} ownProfile={props.ownProfile} />}
+                    {cursorId && <LinksInfo project={{ ...projects.find(item => item.id == cursorId) }} ownProfile={props.ownProfile} />}
                 </div>
             </div>
         </section>
@@ -83,10 +84,10 @@ const UserProjects: FC<InferGetServerSidePropsType<typeof getServerSideProps>> =
 
 export default UserProjects
 
-const LinksInfo: FC<{project: Partial<Pick<ProfileProject, 'demoUrl' | 'githubUrl' | 'partners'>>} & {ownProfile: boolean}> = (props) => {
+const LinksInfo: FC<{ project: Partial<Pick<ProfileProject, 'demoUrl' | 'githubUrl' | 'partners'>> } & { ownProfile: boolean }> = (props) => {
     const dispatch = useAppDispatch();
     const handleEdit = () => {
-        dispatch(changePopup({popup: Popup.Project, data: props.project}))
+        dispatch(changePopup({ popup: Popup.Project, data: props.project }))
     }
     if (!props) return null;
     const project = props.project;
@@ -95,7 +96,7 @@ const LinksInfo: FC<{project: Partial<Pick<ProfileProject, 'demoUrl' | 'githubUr
             <div className={`${project.partners && project.partners.length > 0 ? 'h-10' : 'h-0'}`}></div>
             {
                 props.ownProfile &&
-                <div onClick={handleEdit} className='absolute top-0 h-6 w-6 flex items-center justify-center hover:scale-110 hover:brightness-200 rounded-full cursor-pointer'><EditIcon/></div>
+                <div onClick={handleEdit} className='absolute top-0 h-6 w-6 flex items-center justify-center hover:scale-110 hover:brightness-200 rounded-full cursor-pointer'><EditIcon /></div>
             }
             <div className='absolute top-10'>
                 <p className='text-sm font-wotfard-md underline'>Links</p>
@@ -123,16 +124,16 @@ const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
     const handleClick = () => setOpen(!open);
     const dispatch = useAppDispatch();
     const handleEdit = () => {
-        dispatch(changePopup({popup: Popup.Project, data: props}))
+        dispatch(changePopup({ popup: Popup.Project, data: props }))
     }
     const handleDelete = () => {
         const promise = new Promise(async (resolve, reject) => {
             const res = await fetch('/api/project/delete', {
                 ...RequestJsonOptions,
-                body: JSON.stringify({id: props.id})
+                body: JSON.stringify({ id: props.id })
             })
             const data = await res.json();
-            if(!data.success){
+            if (!data.success) {
                 return reject();
             }
             resolve(null);
@@ -157,7 +158,7 @@ const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
                             <Image src={props.author.image ?? '/images/person.jpg'} fill={true} style={{ objectFit: 'cover' }} alt='Profile Picture' className='rounded-full' />
                         </figure>
                         <div className='flex flex-col'>
-                            <p className='font-wotfard-sb text-lg'>{props.author.firstName} {props.author.lastName}</p>
+                            <p className='font-wotfard-sb text-base'>{props.author.firstName} {props.author.lastName}</p>
                             <div className='flex gap-x-2 items-center'>
                                 <p className='text-sm text-gray-500'>{parseDate(props.createdAt)}</p>
                                 <div className='w-1 h-1 rounded-full bg-gray-400'></div>
@@ -166,8 +167,8 @@ const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
                         </div>
                     </div>
                     <div onClick={handleClick} className='p-2 relative cursor-pointer w-10 h-10 flex items-center justify-center hover:bg-gray-200 rounded-full'>
-                        <MenuDotsIcon/>
-                        <MoreOptions open={open} handleEdit={handleEdit} handleDelete={handleDelete}/>
+                        <MenuDotsIcon />
+                        <MoreOptions ownProfile={props.ownProfile} open={open} handleEdit={handleEdit} handleDelete={handleDelete} />
                     </div>
                 </div>
                 <div className='flex flex-col gap-y-2 text-center relative'>
@@ -184,42 +185,118 @@ const Project: FC<ProfileProject & { ownProfile: boolean }> = (props) => {
                 <div className='flex gap-x-2 -mt-2'>
                     {props.imagesUrl.map((image, i) =>
                         <Image key={i} quality={100} src={image} width={80} height={80} className='outline outline-1 outline-gray-300 hover:scale-110 cursor-pointer' alt='Project Image' />)}
-
                 </div>
+                {
+                    props.imagesUrl.length > 0 && <div className='w-full h-[1px] bg-gray-200'></div>
+                }
+                <ProjectStats id={props.id} />
             </li>
         </Fragment>
     )
 }
 
-const MoreOptions: FC<{open: boolean} & {handleEdit: () => void} & {handleDelete: () => void}> = (props) => {
-    if(!props.open) return null;
+const ProjectStats: FC<{ id: string }> = (props) => {
+    const [hasLiked, setHasLiked] = useState<boolean>(false)
+    const [likes, setLikes] = useState<ProjectLike[]>([])
+    useEffect(() => {
+
+        (async () => {
+            await fetchLikes();
+        })();
+
+    }, [props.id])
+
+
+    const fetchLikes = async () => {
+            const res = await fetch(`/api/project/likes/get?id=${props.id}`)
+            if (res.status !== 200) {
+                return;
+            }
+            const data = await res.json();
+            setHasLiked(data.hasLiked)
+            setLikes(data.likes);
+    }
+
+    const handleLike = async() => {
+
+        const res = await fetch('/api/project/likes/edit', {
+            ...RequestJsonOptions,
+            body: JSON.stringify({ id: props.id })
+        })
+        const data = await res.json();
+        if(!data || !data.success) return;
+        await fetchLikes();
+
+    }
+
     return (
-        <motion.ul 
-        initial={{opacity: 0, height: '0px'}}
-        transition={{duration: 0.2}}
-        animate={{opacity: 1, minHeight: '104px'}}
-        exit={{opacity: 0, height: '0px'}}
-        className='absolute top-10 right-0 w-[10vw] bg-white rounded shadow-xl flex flex-col gap-y-2 outline outline-1 outline-gray-200 z-[100000]'
+        <div className='flex gap-x-1'>
+            <div onClick={handleLike} className={`flex group gap-x-2 px-2 py-2 ${hasLiked && 'bg-purple-200'} hover:bg-purple-200 cursor-pointer rounded`}>
+                <div className={`fill-white`}>
+                    <LikeIcon />
+                </div>
+                <p className={`group-hover:text-whitee font-wotfard-md`}>{likes.length}</p>
+            </div>
+            <aside className='h-full w-[1px] bg-gray-200'></aside>
+            <div className={`flex group gap-x-2 px-2 py-2 hover:bg-purple-200 cursor-pointer rounded`}>
+                <div className='fill-white'>
+                    <CommentIcon />
+                </div>
+                <p className='group-hover:text-whitee font-wotfard-md'>0</p>
+            </div>
+
+        </div>
+    )
+
+}
+
+const MoreOptions: FC<{ open: boolean; ownProfile: boolean } & { handleEdit: () => void } & { handleDelete: () => void }> = (props) => {
+    if (!props.open) return null;
+    return (
+        <motion.ul
+            initial={{ opacity: 0, height: '0px' }}
+            transition={{ duration: 0.2 }}
+            animate={{ opacity: 1, minHeight: props.ownProfile ? '160px' : '77px' }}
+            exit={{ opacity: 0, height: '0px' }}
+            className='absolute top-10 right-0 w-[12vw] min-w-[175px] bg-white rounded shadow-xl flex flex-col gap-y-2 outline outline-1 outline-gray-200 z-[100000]'
         >
-            <li onClick={props.handleEdit} className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2'>
-                <EditIcon/>
-                <p>Edit Project</p>
-            </li>
-            <li onClick={props.handleDelete} className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2'>
-                <DeleteIcon/>
-                <p>Delete Project</p>
-            </li>
-
-
-
+            {
+                props.ownProfile &&
+                <Fragment>
+                    <motion.li
+                        initial={{ opacity: 0 }}
+                        transition={{ delay: 0.2 }}
+                        animate={{ opacity: 1 }}
+                        onClick={props.handleEdit} className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2'>
+                        <EditIcon />
+                        <p>Edit Project</p>
+                    </motion.li>
+                    <motion.li
+                        initial={{ opacity: 0 }}
+                        transition={{ delay: 0.4 }}
+                        animate={{ opacity: 1 }}
+                        onClick={props.handleDelete} className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2'>
+                        <DeleteIcon />
+                        <p>Delete Project</p>
+                    </motion.li>
+                </Fragment>
+            }
+            <motion.li
+                initial={{ opacity: 0 }}
+                transition={{ delay: props.ownProfile ? 0.6 : 0.2 }}
+                animate={{ opacity: 1 }}
+                className='flex gap-x-3 py-3 hover:bg-gray-200 pl-2 border-t-[1px]'>
+                <ReportIcon />
+                <p>Report an issue</p>
+            </motion.li>
         </motion.ul>
     )
 }
 
 const Privacy: FC<Pick<ProfileProject, 'published'> & { ownProfile: boolean }> = (props) => {
     const { ownProfile } = props;
-    const title = props.published == Publicity.Private ? 'Private. Only you can see this post.' : 
-    props.published == Publicity.Public ? 'Public. Everyone can view this post.' : props.published == Publicity.Friends ? 'Friends. Only people who are connected with you can view this post.' : '';
+    const title = props.published == Publicity.Private ? 'Private. Only you can see this post.' :
+        props.published == Publicity.Public ? 'Public. Everyone can view this post.' : props.published == Publicity.Friends ? 'Friends. Only people who are connected with you can view this post.' : '';
     return <div title={title} className={`${ownProfile && 'cursor-pointer hover:fill-slate-800 hover:scale-110'} fill-slate-500`}>
         {
             (props.published == Publicity.Private) ? <PrivateIcon />

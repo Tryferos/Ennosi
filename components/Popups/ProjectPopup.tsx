@@ -12,7 +12,7 @@ type ImageProps = {
 const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}}[]}) | null> = (props) => {
 
     const [thumbnail, setThumbnail] = useState<ImageProps | null>(props?.thubmnailUrl ? { url: props.thubmnailUrl, file: new Blob() } : null);
-    const [images, setImages] = useState<ImageProps[]>([]);
+    const [images, setImages] = useState<ImageProps[]>(props?.imagesUrl ? props.imagesUrl.map(item => ({url: item, file: new Blob()})) : []);
     const inputRef = useRef<HTMLInputElement>(null);
     const form = useRef<HTMLFormElement>(null);
     const [title, setTitle] = useState<string>(props?.title || '');
@@ -82,7 +82,8 @@ const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}
             githubUrl: github,
             demoUrl: demo,
             id: props?.id,
-            thubmnailUrl: props?.id ? props.thubmnailUrl : null,
+            thubmnailUrl: props?.id ? thumbnail?.url : null,
+            imagesUrl: props?.id ? images.map(item => item.url) : [],
             published: privacy,
             partners: partners.map((partner) => ({ userId: partner.userId, }))
         }
