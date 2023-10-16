@@ -25,3 +25,9 @@ export function parseDate(_date: Date){
         return `${days} day${days != 1 ? 's' : ''} ago`;
     }
 }
+
+export const formatNumber = (num: number) => {
+    if(num < 1000) return num.toString();
+    if(num < 1000000) return `${Math.floor(num/1000)}${(Math.floor(num/100))%10!=0 ? `.${(Math.floor(num/100))%10}` : ''}k`;
+    return `${Math.floor(num/1000000)}${(Math.floor(num/100000))%10!=0 ? `.${(Math.floor(num/100000))%10}` : ''}m`;
+}

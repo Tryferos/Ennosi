@@ -32,4 +32,4 @@ export type Notifications = {
 
 
 export type UploadProject = Partial<Pick<Project, 'demoUrl' | 'description' | 'title' | 'thubmnailUrl' | 'githubUrl' | 'id' | 'published' | 'imagesUrl'>>;
-export type UploadPartner = Pick<ProjectPartners, 'userId'> & Pick<User, 'firstName' | 'lastName'> & Partial<Pick<User, 'image'>>;
+export type UploadPartner = Pick<ProjectPartners, 'id' | 'userId'> & Pick<User, 'firstName' | 'lastName'> & Partial<Pick<User, 'image'>>;

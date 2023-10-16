@@ -76,6 +76,7 @@ const ProjectPopup: FC<(Project & {partners: {user: UploadPartner & {id: string}
         if (!form || !form.current) return rej();
         form.current.reportValidity();
         if (!form.current.checkValidity()) return rej();
+        console.log(partners);
         const project: UploadProject & { partners: Pick<UploadPartner, 'userId'>[] } = {
             title,
             description,
